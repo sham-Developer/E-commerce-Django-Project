@@ -1,0 +1,11 @@
+import sqlite3
+
+
+def importf():
+    con = sqlite3.Connection('db.sqlite3')
+    cur = con.cursor()
+    f = cur.execute('select sum(product_price) from app_cart2')
+    data = f.fetchall()
+    if data is not None:
+        print(data)
+    return print(data)

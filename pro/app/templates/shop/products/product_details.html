@@ -1,0 +1,270 @@
+
+<style>
+    #pro_img img{
+        height: 300px;
+        width: 300px;
+    }
+    
+.pic-box{
+    position: relative;
+}
+
+.hot{
+    background-color: orangered;
+    color: white;
+    width: 75px;
+    text-align: center;
+    font-weight: bold;
+    display: inline;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    top: 0;
+    right: 1000;
+    z-index: 10;
+}
+#btnCart, #btnFav{
+    width: 30%;
+}
+
+#btnFav{
+    margin-bottom: 6px;
+}
+
+#cate:hover{
+    margin: 1px solid black;
+}
+
+@media (max-width:1158px){
+    .hot{
+        right: 650;
+    }
+}
+@media (max-width:991px){
+    .hot{
+        top: -330;
+        right: 400;
+    }
+}
+@media (max-width:770px){
+    .hot{
+        right: 230;
+    }
+}
+@media (max-width:600px){
+        #btnCart{
+          width: 30%;
+        }
+        .hot{
+            top: -331;
+            right:160;
+        }
+      }
+
+@media (max-width:600px){
+    .hot{
+        right: 230;
+    }
+}
+@media (max-width:550px){
+    .hot{   
+        right: 230;
+    }
+}
+@media (max-width:544px){
+    .hot{   
+        right: 140;
+    }
+}
+@media (max-width:400px){
+    .hot{
+        right: 80;
+    }
+}
+      @media (max-width:900px){
+        #btnCart{
+          width: 30%;
+        }
+      }
+      @media (max-width:1200px){
+        #btnCart{
+          width: 30%;
+        }
+      }
+
+</style>
+{% extends 'shop/layouts/main.html' %}
+
+{% block title %}
+myShopKart | Online shopping
+{% endblock title %}
+{% block content %}
+
+<section class="bg-light py-4 my-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h4 class="mb-3">{{product_name}} Details</h4>
+                <hr style="border-color: #b8bfc2;">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                      <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                      <li class="breadcrumb-item"><a href="{% url 'collections' product.category.name %}">Collections</a></li>
+                      <li class="breadcrumb-item active" aria-current="page">{{product}}</li>
+                    </ol>
+                  </nav>
+            </div>
+            <div class="col-4 my-3" id="pro_img">
+                <img src="{{product.product_image.url}}" class="card-image-top" alt="productname">
+            </div>
+            <div class="col-lg-8 col-md-12 col-sm-12 my-3 pic-box">
+                {% if product.trending > 0 %}
+                <div class="hot">HOT</div>
+                {% endif %}
+                <h5 class="text-success">{{product | upper}}</h5>
+                <p>{{product.vendor}}</p>
+                <p>{{product.description}}</p>
+                <h6 class="my-2 text-danger">Current Price : Rs. <s>{{product.original_price}}</s></h6>
+                <h5 class="my-2 text-success" >Offer Price : Rs. {{product.selling_price}}</h5>
+                <div class="my-3">
+                    {% if product.quantity > 0 %}
+                    <input type="hidden" name="" value="{{product.id}}" id="pid">
+                    <input type="hidden" name="" value="{{product.selling_price | stringformat:'d' }}" id="product_price">
+
+                    
+                    {% csrf_token %}
+                    <p>
+                        <div class="input-group" style="width: 150px;">
+                        <button class="input-group-text bg-success text-light" id="btnMinus"><i class="fa fa-minus"></i></button>
+                            <input type="text" name="qty" id="txtQty" value="1" class="form-control text-center">
+                        <button class="input-group-text bg-success text-light" id="btnPlus"><i class="fa fa-plus"></i></button>
+
+                    </div>
+                    </p>
+                    <br>
+                    <div>
+                    <button class="btn btn-primary btn-block fs-5" id="btnCart"><i class="fa fa-cart"></i> Add to Cart</button>
+                    {% else %}
+                    <button class="btn btn-secondary"><i class="fa fa-minus"></i> Out of Stock</button>
+                    {% endif %}
+                    <button class="btn btn-danger btn-block fs-5" id="btnFav"><i class="fa fa-heart"></i> Favourites</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    document.addEventListener("DOMContentLoaded", function(event){
+        const btnMinus = document.getElementById("btnMinus");
+        const txtQty = document.getElementById("txtQty");
+        const btnPlus = document.getElementById("btnPlus");
+        const pid = document.getElementById("pid");
+        const product_price = document.getElementById("product_price");
+        const tkn = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+        const btnCart = document.getElementById("btnCart");
+        const btnFav = document.getElementById("btnFav");
+
+
+
+        btnPlus.addEventListener("click", function(){
+            let qty=parseInt(txtQty.value, 10);
+            qty=isNaN(qty)?0:qty;
+            // console.log(qty);
+            if(qty<10){
+                qty++;
+                txtQty.value=qty;
+            }
+        });
+        btnMinus.addEventListener("click", function(){
+            let qty=parseInt(txtQty.value,10);
+            qty = isNaN(qty)?0:qty;
+            if (qty>1){
+                qty--;
+                txtQty.value=qty;
+            }
+        });
+        btnCart.addEventListener("click", function(){
+            let qty=parseInt(txtQty.value,10);
+            qty = isNaN(qty)?0:qty;
+            if (qty>0){
+                let postObj = {
+                    product_qty: qty,
+                    pid: pid.value,
+                    product_price : product_price.value,
+                    token: tkn
+                }
+                console.log(postObj);
+                fetch("/addtocart",{
+                    method:'POST',
+                    credentials: 'same-origin',
+                    headers:{
+                        'Accept':"application/json",
+                        'X-Requested-With':'XMLHttpRequest',
+                        'X-CSRFToken':'{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(postObj)
+                }).then(response => {
+                    return response.json();
+                }).then((data => {
+                    // console.log(data);
+                    alert(data['status'])
+                }))
+            }
+            else{
+                alert("please enter a quantity")
+            }
+        });
+
+        btnFav.addEventListener("click", function(){
+            
+                let postObj = {
+                    pid: pid.value
+                }
+                // console.log(postObj);
+                fetch("/fav",{
+                    method:'POST',
+                    credentials: 'same-origin',
+                    headers:{
+                        'Accept':"application/json",
+                        'X-Requested-With':'XMLHttpRequest',
+                        'X-CSRFToken':'{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(postObj)
+                }).then(response => {
+                    return response.json();
+                }).then((data => {
+                    // console.log(data);
+                    alert(data['status'])
+                }))
+        });
+ 
+    });
+</script>
+
+{% endblock content %}
+<!-- <script>
+    document.addEventListener("DOMContentLoaded", function(event){
+        const btnPlus = document.getElementById("btnPlus")
+        const btnMinus = document.getElementById("btnMinus")
+        const txtQty = document.getElementById("txtQty")
+
+        btnPlus.addEventListener("click", function(){
+            let qty=parseInt(txtQty.value,10);
+            qty = isNan(qty)?0:qty;
+            if (qty<10){
+                qty++;
+                txtQty.value=qty;
+            }
+        });
+        btnMinus.addEventListener("click", function(){
+            let qty=parseInt(txtQty.value,10);
+            qty = isNan(qty)?0:qty;
+            if (qty>1){
+                qtt--;
+                txtQty.value=qty;
+            }
+        });
+    })
+</script> -->

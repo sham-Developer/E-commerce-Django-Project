@@ -1,0 +1,45 @@
+{% extends 'shop/layouts/main.html' %}
+
+{% block title %}
+Search | myShopKart
+{% endblock title %}
+
+{% block content %}
+
+<div class="" style="margin-top: 100px; margin-left: 50px;">
+    
+<form class="form-inline my-2 my-lg-0">
+    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="searchF" id="searchF">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+  </form>
+</div>
+
+<div style="height: 5vh; margin-left: 50px; margin-top: 50px;">
+    You searched for : {{searchV}}
+</div>
+
+<div class="container">
+    <div class="row">
+        {% for item in data %}
+            <div class="col-md-4 col-lg-3 col-sm-6">
+                <div class="card my-3" id="cate">
+                    <a href="{% url 'product_details' item.category.name item.name %}">
+                        <img src="{{ item.product_image.url }}" alt="Categories" height="300px" width="300px" class="card-image-top">
+
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{item.name}}</h5>
+                        <p class="card-text">
+                            <span class="float-start old_price"><s>Rs. {{item.original_price}}</s></span> 
+                            <span class="float-end new_price">Rs. {{item.selling_price}}</span>
+                        </p>
+                    </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+
+    </div>
+</div>
+{% endblock content %}
+
+
